@@ -3,7 +3,7 @@
     <Metadata>
         <Identity Id="NPLForVisualStudio.5de735c1-ac19-4a77-a20d-41a10f745cff" Version="1.0" Language="en-US" Publisher="Xizhi" />
         <DisplayName>NPLForVisualStudio</DisplayName>
-        <Description xml:space="preserve">NPL language service for visua studio 2022 or above</Description>
+        <Description xml:space="preserve">NPL language service for visual studio 2022 or above</Description>
     </Metadata>
     <Installation>
         <InstallationTarget Id="Microsoft.VisualStudio.Community" Version="[17.0, 18.0)">
