@@ -106,33 +106,20 @@ namespace NPLForVisualStudio
                 using (var client = new HttpClient())
                 {
                     client.BaseAddress = new Uri("http://127.0.0.1:8099/");
-                    var content = new FormUrlEncodedContent(new[]
-                    {
+                    var content = new FormUrlEncodedContent(new[]{
                             new KeyValuePair<string, string>("action", "addbreakpoint"),
                             new KeyValuePair<string, string>("filename", sFileName),
                             new KeyValuePair<string, string>("line", lineNumber.ToString()),
                         });
                     var result = client.PostAsync("/ajax/debugger", content).Result;
-                    var task = result.Content.ReadAsStringAsync();
-                    task.ContinueWith((t) => {
-                        if (t.IsFaulted || t.IsCanceled)
-                        {
-                            if (System.Windows.MessageBox.Show("Please start your NPL process first \nand start NPL Code Wiki at: \n http://127.0.0.1:8099/ \nDo you want to see help page?", "NPL HTTP Debugger", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes)
-                            {
-                                System.Diagnostics.Process.Start("https://github.com/LiXizhi/NPLRuntime/wiki/NPLCodeWiki");
-                            }
-                        }
-                        else
-                        {
-                            // completed successfully
-                            string url = "http://127.0.0.1:8099/debugger";
-                            // url += string.Format("?filename={0}&line={1}", sFileName, lineNumber);
-                            System.Diagnostics.Process.Start(url);
-                        }
-                    });
+                    string sResult = await result.Content.ReadAsStringAsync();
+                    // completed successfully
+                    string url = "http://127.0.0.1:8099/debugger";
+                    // url += string.Format("?filename={0}&line={1}", sFileName, lineNumber);
+                    System.Diagnostics.Process.Start(url);
                 }
             }
-            catch (Exception exp)
+            catch (Exception)
             {
                 if (System.Windows.MessageBox.Show("Please start your NPL process first \nand start NPL Code Wiki at: \n http://127.0.0.1:8099/ \nDo you want to see help page?", "NPL HTTP Debugger", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes)
                 {
