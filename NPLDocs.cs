@@ -14,6 +14,10 @@ using System.Threading.Tasks;
 
 namespace NPLForVisualStudio
 {
+    /// <summary>
+    /// This is the main class for code completion and intellisense. 
+    /// dte property is set when visual studio package starts. 
+    /// </summary>
     sealed internal class NPLDocs
     {
         public readonly XmlDocumentationLoader xmlDocumentationLoader = new XmlDocumentationLoader();
@@ -50,6 +54,32 @@ namespace NPLForVisualStudio
                     }
                     return instance;
                 }
+            }
+        }
+
+        public void LoadDocumentationInSolution()
+        {
+            try
+            {
+                string solutionDir = System.IO.Path.GetDirectoryName(Dte.Solution.FullName);
+                if (solutionDir != null)
+                {
+                    // Load the documentation
+                    LoadXmlDocumentation(solutionDir + "\\");
+
+                    foreach (Project proj in Dte.Solution.Projects)
+                    {
+                        string projDir = System.IO.Path.GetDirectoryName(proj.FullName);
+                        if (projDir != null && projDir != solutionDir)
+                        {
+                            // Load the documentation
+                            LoadXmlDocumentation(projDir + "\\");
+                        }
+                    }
+                }
+            }
+            catch (Exception)
+            {
             }
         }
 

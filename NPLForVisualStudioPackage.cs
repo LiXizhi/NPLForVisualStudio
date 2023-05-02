@@ -1,5 +1,10 @@
 ﻿using EnvDTE;
+using EnvDTE80;
+using Microsoft.VisualStudio;
+using Microsoft.VisualStudio.Package;
 using Microsoft.VisualStudio.Shell;
+using Microsoft.VisualStudio.Shell.Events;
+using Microsoft.VisualStudio.Shell.Interop;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
@@ -53,9 +58,18 @@ namespace NPLForVisualStudio
             await NPLCommandGotoDefinition.InitializeAsync(this);
 
             NPLDocs.Instance.Dte = await GetServiceAsync(typeof(DTE)) as DTE;
+
+            var events = NPLDocs.Instance.Dte.Events;
+            var solutionEvents = events.SolutionEvents;
+            solutionEvents.Opened += HandleOpenSolution;
         }
 
         #endregion
+
+        private void HandleOpenSolution()
+        {
+            NPLDocs.Instance.LoadDocumentationInSolution();
+        }
 
         /// <summary>
         /// write a line of text to NPL output panel

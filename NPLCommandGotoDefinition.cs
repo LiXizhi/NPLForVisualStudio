@@ -95,7 +95,7 @@ namespace NPLForVisualStudio
                 EnvDTE.TextSelection ts = dte.ActiveWindow.Selection as EnvDTE.TextSelection;
                 if (ts == null)
                     return;
-                
+                // TODO: Get current line text and line cursor position
                 //NPLDocs.Instance.FindGotoDefinition();
                 //dte.Documents.Open("C:\\temp\\test.sh");
             }

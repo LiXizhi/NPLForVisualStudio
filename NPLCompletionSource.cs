@@ -17,7 +17,7 @@ namespace NPLForVisualStudio
 {
     class NPLCompletionSource : IAsyncCompletionSource
     {
-        private NPLDocs Catalog { get; }
+        private NPLDocs docs { get; }
         private ITextStructureNavigatorSelectorService StructureNavigatorSelector { get; }
 
         // ImageElements may be shared by CompletionFilters and CompletionItems. The automationName parameter should be localized.
@@ -39,9 +39,9 @@ namespace NPLForVisualStudio
         static ImmutableArray<CompletionFilter> MetalloidFilters = ImmutableArray.Create(MetalFilter, NonMetalFilter);
         static ImmutableArray<CompletionFilter> UnknownFilters = ImmutableArray.Create(UnknownFilter);
 
-        public NPLCompletionSource(NPLDocs catalog, ITextStructureNavigatorSelectorService structureNavigatorSelector)
+        public NPLCompletionSource(NPLDocs docs_, ITextStructureNavigatorSelectorService structureNavigatorSelector)
         {
-            Catalog = catalog;
+            docs = docs_;
             StructureNavigatorSelector = structureNavigatorSelector;
         }
 
@@ -153,7 +153,7 @@ namespace NPLForVisualStudio
             ImmutableArray<CompletionItem> itemsBasedOnKey = ImmutableArray<CompletionItem>.Empty;
             if (!string.IsNullOrEmpty(key))
             {
-                var matchingElement = Catalog.Elements.FirstOrDefault(n => n.Name == key);
+                var matchingElement = docs.Elements.FirstOrDefault(n => n.Name == key);
                 if (matchingElement != null)
                 {
                     var itemsBuilder = ImmutableArray.CreateBuilder<CompletionItem>();
@@ -175,7 +175,7 @@ namespace NPLForVisualStudio
         /// </summary>
         private CompletionContext GetContextForKey()
         {
-            var context = new CompletionContext(Catalog.Elements.Select(n => MakeItemFromElement(n)).ToImmutableArray());
+            var context = new CompletionContext(docs.Elements.Select(n => MakeItemFromElement(n)).ToImmutableArray());
             return context;
         }
 
