@@ -17,7 +17,7 @@ namespace NPLForVisualStudio
 {
     class NPLCompletionSource : IAsyncCompletionSource
     {
-        private ElementCatalog Catalog { get; }
+        private NPLDocs Catalog { get; }
         private ITextStructureNavigatorSelectorService StructureNavigatorSelector { get; }
 
         // ImageElements may be shared by CompletionFilters and CompletionItems. The automationName parameter should be localized.
@@ -39,7 +39,7 @@ namespace NPLForVisualStudio
         static ImmutableArray<CompletionFilter> MetalloidFilters = ImmutableArray.Create(MetalFilter, NonMetalFilter);
         static ImmutableArray<CompletionFilter> UnknownFilters = ImmutableArray.Create(UnknownFilter);
 
-        public NPLCompletionSource(ElementCatalog catalog, ITextStructureNavigatorSelectorService structureNavigatorSelector)
+        public NPLCompletionSource(NPLDocs catalog, ITextStructureNavigatorSelectorService structureNavigatorSelector)
         {
             Catalog = catalog;
             StructureNavigatorSelector = structureNavigatorSelector;
@@ -180,28 +180,28 @@ namespace NPLForVisualStudio
         }
 
         /// <summary>
-        /// Builds a <see cref="CompletionItem"/> based on <see cref="ElementCatalog.Element"/>
+        /// Builds a <see cref="CompletionItem"/> based on <see cref="NPLDocs.Element"/>
         /// </summary>
-        private CompletionItem MakeItemFromElement(ElementCatalog.Element element)
+        private CompletionItem MakeItemFromElement(NPLDocs.Element element)
         {
             ImageElement icon = null;
             ImmutableArray<CompletionFilter> filters;
 
             switch (element.Category)
             {
-                case ElementCatalog.Element.Categories.Metal:
+                case NPLDocs.Element.Categories.Metal:
                     icon = MetalIcon;
                     filters = MetalFilters;
                     break;
-                case ElementCatalog.Element.Categories.Metalloid:
+                case NPLDocs.Element.Categories.Metalloid:
                     icon = MetalloidIcon;
                     filters = MetalloidFilters;
                     break;
-                case ElementCatalog.Element.Categories.NonMetal:
+                case NPLDocs.Element.Categories.NonMetal:
                     icon = NonMetalIcon;
                     filters = NonMetalFilters;
                     break;
-                case ElementCatalog.Element.Categories.Uncategorized:
+                case NPLDocs.Element.Categories.Uncategorized:
                     icon = UnknownIcon;
                     filters = UnknownFilters;
                     break;
@@ -219,7 +219,7 @@ namespace NPLForVisualStudio
 
             // Each completion item we build has a reference to the element in the property bag.
             // We use this information when we construct the tooltip.
-            item.Properties.AddProperty(nameof(ElementCatalog.Element), element);
+            item.Properties.AddProperty(nameof(NPLDocs.Element), element);
 
             return item;
         }
@@ -229,20 +229,20 @@ namespace NPLForVisualStudio
         /// </summary>
         public async Task<object> GetDescriptionAsync(IAsyncCompletionSession session, CompletionItem item, CancellationToken token)
         {
-            if (item.Properties.TryGetProperty<ElementCatalog.Element>(nameof(ElementCatalog.Element), out var matchingElement))
+            if (item.Properties.TryGetProperty<NPLDocs.Element>(nameof(NPLDocs.Element), out var matchingElement))
             {
                 return $"{matchingElement.Name} [{matchingElement.AtomicNumber}, {matchingElement.Symbol}] is {GetCategoryName(matchingElement.Category)} with atomic weight {matchingElement.AtomicWeight}";
             }
             return null;
         }
 
-        private string GetCategoryName(ElementCatalog.Element.Categories category)
+        private string GetCategoryName(NPLDocs.Element.Categories category)
         {
             switch(category)
             {
-                case ElementCatalog.Element.Categories.Metal: return "a metal";
-                case ElementCatalog.Element.Categories.Metalloid: return "a metalloid";
-                case ElementCatalog.Element.Categories.NonMetal: return "a non metal";
+                case NPLDocs.Element.Categories.Metal: return "a metal";
+                case NPLDocs.Element.Categories.Metalloid: return "a metalloid";
+                case NPLDocs.Element.Categories.NonMetal: return "a non metal";
                 default:  return "an uncategorized element";
             }
         }

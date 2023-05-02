@@ -19,9 +19,6 @@ namespace NPLForVisualStudio
         IDictionary<ITextView, IAsyncCompletionSource> cache = new Dictionary<ITextView, IAsyncCompletionSource>();
 
         [Import]
-        ElementCatalog Catalog;
-
-        [Import]
         ITextStructureNavigatorSelectorService StructureNavigatorSelector;
 
         public IAsyncCompletionSource GetOrCreate(ITextView textView)
@@ -29,7 +26,7 @@ namespace NPLForVisualStudio
             if (cache.TryGetValue(textView, out var itemSource))
                 return itemSource;
 
-            var source = new NPLCompletionSource(Catalog, StructureNavigatorSelector); // opportunity to pass in MEF parts
+            var source = new NPLCompletionSource(NPLDocs.Instance, StructureNavigatorSelector); // opportunity to pass in MEF parts
             textView.Closed += (o, e) => cache.Remove(textView); // clean up memory as files are closed
             cache.Add(textView, source);
             return source;

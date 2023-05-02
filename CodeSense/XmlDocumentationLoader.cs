@@ -256,17 +256,10 @@ namespace NPLForVisualStudio
         private static XElement ValidateAndLoadXmlDocument(string path)
         {
             var validator = new XmlValidator();
-            using (StreamReader sr=File.OpenText(path))
+            using (StreamReader sr = File.OpenText(path))
             {
                 string xmlContent = sr.ReadToEnd();
-                using(Stream schemaStream=typeof (XmlDocumentationLoader).Assembly.GetManifestResourceStream(
-                    "ParaEngine.NPLLanguageService.Documentation.LuaDoc.xsd"))
-                {
-                	if (validator.Validate(xmlContent, schemaStream))
-                		return XElement.Load(path);
-                	
-					throw new ApplicationException(validator.ErrorMessage);
-                }
+                return XElement.Load(path);
             }
         }
     }

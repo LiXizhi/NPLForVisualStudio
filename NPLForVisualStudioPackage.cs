@@ -1,7 +1,9 @@
-﻿using Microsoft.VisualStudio.Shell;
+﻿using EnvDTE;
+using Microsoft.VisualStudio.Shell;
 using System;
 using System.Runtime.InteropServices;
 using System.Threading;
+using System.Threading.Tasks;
 using Task = System.Threading.Tasks.Task;
 
 namespace NPLForVisualStudio
@@ -47,9 +49,21 @@ namespace NPLForVisualStudio
             // When initialized asynchronously, the current thread may be a background thread at this point.
             // Do any initialization that requires the UI thread after switching to the UI thread.
             await this.JoinableTaskFactory.SwitchToMainThreadAsync(cancellationToken);
-            await NPLCommand.InitializeAsync(this);
+            await NPLCommandSetBreakpoint.InitializeAsync(this);
+            await NPLCommandGotoDefinition.InitializeAsync(this);
+
+            NPLDocs.Instance.Dte = await GetServiceAsync(typeof(DTE)) as DTE;
         }
 
         #endregion
+
+        /// <summary>
+        /// write a line of text to NPL output panel
+        /// </summary>
+        /// <param name="text"></param>
+        public async void WriteOutput(String text)
+        {
+            Console.WriteLine(text);
+        }
     }
 }

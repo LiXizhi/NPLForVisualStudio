@@ -50,9 +50,14 @@
     <Compile Include="CodeSense\DeclarationType.cs" />
     <Compile Include="CodeSense\Method.cs" />
     <Compile Include="CodeSense\Parameter.cs" />
-    <Compile Include="ElementCatalog.cs" />
+    <Compile Include="Documentation\CommandDoc.cs" />
+    <Compile Include="Documentation\DeclarationAuthoringScope.cs" />
+    <Compile Include="NPLAsyncQuickInfoProvider.cs" />
+    <Compile Include="NPLAsyncQuickInfoSource.cs" />
+    <Compile Include="NPLCommandGotoDefinition.cs" />
+    <Compile Include="NPLDocs.cs" />
     <Compile Include="CodeSense\ICodeSenseDeclarationProvider.cs" />
-    <Compile Include="NPLCommand.cs" />
+    <Compile Include="NPLCommandSetBreakpoint.cs" />
     <Compile Include="NPLCompletionCommitManager.cs" />
     <Compile Include="NPLCompletionCommitManagerProvider.cs" />
     <Compile Include="NPLCompletionSource.cs" />
@@ -65,6 +70,9 @@
     <Compile Include="CodeSense\XmlValidator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="Documentation\LuaDoc.xsd">
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <None Include="README.md" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
@@ -115,7 +123,19 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Documentation\Globals.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Documentation\MathTable.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Documentation\NplDocumentation.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Documentation\StringTable.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
+    <Content Include="Documentation\TableTable.xml">
       <IncludeInVSIX>true</IncludeInVSIX>
     </Content>
     <Content Include="Resources\NPLCommand.png" />
