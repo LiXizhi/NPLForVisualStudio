@@ -45,16 +45,27 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="CodeSense\Declaration.cs" />
+    <Compile Include="CodeSense\DeclarationFactory.cs" />
+    <Compile Include="CodeSense\DeclarationType.cs" />
+    <Compile Include="CodeSense\Method.cs" />
+    <Compile Include="CodeSense\Parameter.cs" />
     <Compile Include="ElementCatalog.cs" />
+    <Compile Include="CodeSense\ICodeSenseDeclarationProvider.cs" />
     <Compile Include="NPLCommand.cs" />
     <Compile Include="NPLCompletionCommitManager.cs" />
     <Compile Include="NPLCompletionCommitManagerProvider.cs" />
     <Compile Include="NPLCompletionSource.cs" />
     <Compile Include="NPLCompletionSourceProvider.cs" />
+    <Compile Include="NPLContentTypeDefinition.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="NPLForVisualStudioPackage.cs" />
+    <Compile Include="CodeSense\TableDeclarationProvider.cs" />
+    <Compile Include="CodeSense\XmlDocumentationLoader.cs" />
+    <Compile Include="CodeSense\XmlValidator.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="README.md" />
     <None Include="source.extension.vsixmanifest">
       <SubType>Designer</SubType>
     </None>
@@ -69,6 +80,7 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="envdte">
@@ -103,6 +115,9 @@
     </VSCTCompile>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Documentation\NplDocumentation.xml">
+      <IncludeInVSIX>true</IncludeInVSIX>
+    </Content>
     <Content Include="Resources\NPLCommand.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

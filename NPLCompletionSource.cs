@@ -51,6 +51,7 @@ namespace NPLForVisualStudio
             if (char.IsNumber(trigger.Character)         // a number
                 || char.IsPunctuation(trigger.Character) // punctuation
                 || trigger.Character == '\n'             // new line
+                || trigger.Character == '\t'             // tab 
                 || trigger.Reason == CompletionTriggerReason.Backspace
                 || trigger.Reason == CompletionTriggerReason.Deletion)
             {

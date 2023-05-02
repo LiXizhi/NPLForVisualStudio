@@ -10,6 +10,18 @@ namespace NPLForVisualStudio
 {
     /// <summary>
     /// The simplest implementation of IAsyncCompletionCommitManager that provides Commit Characters and uses default behavior otherwise
+    /// When we first create the completion session, we access the PotentialCommitCharacters property that returns characters that potentially commit completion 
+    /// when user types them. We access this property, therefore it should return a preallocated array.
+    /// Typically, the commit characters include space and other token delimeters such as ., (, ). Don't worry about Tab and Enter, as they are handled separately. 
+    /// If a character is a commit character in some, but not all situations, you must add it to this collection. 
+    /// Characters from available IAsyncCompletionCommitManagers are combined into a single collection for the duration of the completion session.
+    /// 
+    /// We maintain this list so that editor's completion feature can quickly ignore characters that are not commit characters. 
+    /// If user types a character found in the provided array, Editor will call ShouldCommitCompletion on the UI thread. 
+    /// This is an opportunity to tell whether certain character is indeed a commit character in the given location. 
+    /// In most cases, simply return true, which means that every character in PotentialCommitCharacters will trigger the commit behavior.
+    /// 
+    /// see also: https://github.com/microsoft/vs-editor-api/issues/9
     /// </summary>
     internal class NPLCompletionCommitManager : IAsyncCompletionCommitManager
     {
