@@ -30,7 +30,7 @@ namespace NPLForVisualStudio
         private EnvDTE.DTE dte = null;
         public EnvDTE.DTE Dte { get => dte; set => dte = value; }
 
-        private DeclarationAuthoringScope authoringScope;
+        public DeclarationAuthoringScope authoringScope;
 
         public NPLDocs()
         {
@@ -129,15 +129,14 @@ namespace NPLForVisualStudio
             return assemblyFileInfo.Directory.FullName;
         }
 
-        private void BuildQuickInfoString(TableDeclarationProvider declarations, string sWord, StringBuilder info, string sPrefix = null)
+        private void BuildQuickInfoString(TableDeclarationProvider declarations, string sWord, in List<Method> listMethods, string sPrefix = null)
         {
             if (declarations != null)
             {
                 foreach (var method in declarations.FindMethods(sWord))
                 {
-                    info.AppendFormat("{0}{1}",
-                        info.Length == 0 ? "" : "\n-------------------\n",
-                        method.Value.GetQuickInfo(!String.IsNullOrEmpty(sPrefix) ? sPrefix : (String.IsNullOrEmpty(method.Key) ? "" : method.Key + ".")));
+                    //listMethods.Add(method.Value.GetQuickInfo(!String.IsNullOrEmpty(sPrefix) ? sPrefix : (String.IsNullOrEmpty(method.Key) ? "" : method.Key + ".")));
+                    listMethods.Add(method.Value);
                 }
             }
         }
@@ -187,23 +186,18 @@ namespace NPLForVisualStudio
         /// called from parser thread
         /// </summary>
         /// <param name="request"></param>
-        public string FindQuickInfo(string sLine, in int nCursor)
+        public List<Method> FindQuickInfo(string sLine, in int nCursor)
         {
             int nColFrom, nColTo;
-            string sInfo = "";
+            List<Method> listMethods = new List<Method>();
             string sWord = GetWordFromLineAndCursor(sLine, nCursor, out nColFrom, out nColTo);
             if (sWord != null && sWord.Length > 0)
             {
                 StringBuilder info = new StringBuilder();
 
-                BuildQuickInfoString(xmlDeclarationProvider, sWord, info);
-
-                if (info.Length > 0)
-                {
-                    sInfo = info.ToString();
-                }
+                BuildQuickInfoString(xmlDeclarationProvider, sWord, listMethods);
             }
-            return sInfo;
+            return listMethods;
         }
 
         private string FindDocFileInDir(string filename, string solutionDir)
@@ -274,7 +268,7 @@ namespace NPLForVisualStudio
             return false;
         }
 
-        private bool FindGotoDefinition(string sLine, in int nCursor)
+        public bool FindGotoDefinition(string sLine, in int nCursor)
         {
             authoringScope.m_goto_filename = null;
             

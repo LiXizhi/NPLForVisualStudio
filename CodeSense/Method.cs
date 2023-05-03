@@ -16,12 +16,19 @@ namespace NPLForVisualStudio
         /// <returns></returns>
         public string GetQuickInfo(string methodPrefix)
         {
-            StringBuilder output = new StringBuilder();
-            if(!string.IsNullOrEmpty(this.Description))
+            string output = "";
+            if(!string.IsNullOrEmpty(Description))
             {
-                output.AppendFormat("{0}\n", this.Description);
+                output += $"{Description}\n";
             }
-            output.AppendFormat("{0}{1}(", methodPrefix==null ? "" : methodPrefix, this.Name);
+            output += GetMethodDeclarationString(methodPrefix);
+            return output;
+        }
+
+        public string GetMethodDeclarationString(string methodPrefix = null)
+        {
+            StringBuilder output = new StringBuilder();
+            output.AppendFormat("{0}{1}(", methodPrefix == null ? "" : methodPrefix, this.Name);
             if (Parameters != null)
             {
                 bool bFirstParam = true;
@@ -45,7 +52,5 @@ namespace NPLForVisualStudio
             output.Append(")");
             return output.ToString();
         }
-
-        
     }
 }

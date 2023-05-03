@@ -95,9 +95,17 @@ namespace NPLForVisualStudio
                 EnvDTE.TextSelection ts = dte.ActiveWindow.Selection as EnvDTE.TextSelection;
                 if (ts == null)
                     return;
-                // TODO: Get current line text and line cursor position
-                //NPLDocs.Instance.FindGotoDefinition();
-                //dte.Documents.Open("C:\\temp\\test.sh");
+                var activePoint = ts.ActivePoint;
+                int nLine = ts.ActivePoint.Line;
+                int nLineCharOffset = ts.ActivePoint.LineCharOffset;
+                string sLine = activePoint.CreateEditPoint().GetLines(activePoint.Line, activePoint.Line + 1);
+
+                // Get current line text and line cursor position
+                if(!String.IsNullOrEmpty(sLine) && NPLDocs.Instance.FindGotoDefinition(sLine, nLineCharOffset))
+                {
+                    var authoringScope = NPLDocs.Instance.authoringScope;
+                    dte.Documents.Open(authoringScope.m_goto_filename);
+                }
             }
             catch (Exception)
             {

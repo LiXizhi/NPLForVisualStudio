@@ -5,6 +5,8 @@ using Microsoft.VisualStudio.Language.StandardClassification;
 using Microsoft.VisualStudio.Text;
 using Microsoft.VisualStudio.Text.Adornments;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,7 +14,7 @@ namespace NPLForVisualStudio
 {
     internal sealed class NPLAsyncQuickInfoSource : IAsyncQuickInfoSource
     {
-        private static readonly ImageId _icon = KnownMonikers.AbstractCube.ToImageId();
+        private static readonly ImageId _icon = KnownMonikers.Method.ToImageId();
         
         private ITextBuffer _textBuffer;
 
@@ -32,25 +34,32 @@ namespace NPLForVisualStudio
                 var lineNumber = triggerPoint.Value.GetContainingLine().LineNumber;
                 var lineSpan = _textBuffer.CurrentSnapshot.CreateTrackingSpan(line.Extent, SpanTrackingMode.EdgeInclusive);
                 string sLine = line.GetText();
-                var sCurrentWord = NPLDocs.Instance.FindQuickInfo(sLine, Math.Min(triggerPoint.Value.Position - line.Start.Position, sLine.Length));
+                var listMethods = NPLDocs.Instance.FindQuickInfo(sLine, Math.Min(triggerPoint.Value.Position - line.Start.Position, sLine.Length));
 
-                var lineNumberElm = new ContainerElement(
-                    ContainerElementStyle.Wrapped,
-                    new ImageElement(_icon),
-                    new ClassifiedTextElement(
-                        new ClassifiedTextRun(PredefinedClassificationTypeNames.Keyword, $"{sCurrentWord} Line number: "),
-                        new ClassifiedTextRun(PredefinedClassificationTypeNames.Identifier, $"{lineNumber + 1}")
-                    ));
+                if(listMethods.Count > 0)
+                {
+                    List<ContainerElement> childElements = new List<ContainerElement>();
+                    foreach (var method in listMethods)
+                    {
+                        if (!string.IsNullOrEmpty(method.Description))
+                        {
+                            childElements.Add(new ContainerElement(
+                                ContainerElementStyle.Wrapped,
+                                new ClassifiedTextElement(
+                                    new ClassifiedTextRun(PredefinedClassificationTypeNames.Comment, method.Description)
+                                )));
+                        }
+                        childElements.Add(new ContainerElement(
+                            ContainerElementStyle.Wrapped,
+                            new ImageElement(_icon),
+                            new ClassifiedTextElement(
+                                new ClassifiedTextRun(PredefinedClassificationTypeNames.Identifier, method.GetMethodDeclarationString())
+                        )));
+                    }
 
-                var dateElm = new ContainerElement(
-                    ContainerElementStyle.Stacked,
-                    lineNumberElm,
-                    new ClassifiedTextElement(
-                        new ClassifiedTextRun(PredefinedClassificationTypeNames.SymbolDefinition, "The current date: "),
-                        new ClassifiedTextRun(PredefinedClassificationTypeNames.Comment, DateTime.Now.ToShortDateString())
-                    ));
-
-                return Task.FromResult(new QuickInfoItem(lineSpan, dateElm));
+                    var parentElm = new ContainerElement(ContainerElementStyle.Stacked, childElements);
+                    return Task.FromResult(new QuickInfoItem(lineSpan, parentElm));
+                }
             }
 
             return Task.FromResult<QuickInfoItem>(null);
