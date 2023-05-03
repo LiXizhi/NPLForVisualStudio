@@ -106,5 +106,10 @@ namespace NPLForVisualStudio
         {
             return String.Format("{0}:{1}", DeclarationType.ToString()[0], Name);
         }
+
+        public virtual string GetInsertText()
+        {
+            return Name;
+        }
     }
 }

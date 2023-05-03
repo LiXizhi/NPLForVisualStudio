@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.Core.Imaging;
+using Microsoft.VisualStudio.Imaging;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion;
 using Microsoft.VisualStudio.Language.Intellisense.AsyncCompletion.Data;
 using Microsoft.VisualStudio.Text;
@@ -21,22 +22,22 @@ namespace NPLForVisualStudio
         private ITextStructureNavigatorSelectorService StructureNavigatorSelector { get; }
 
         // ImageElements may be shared by CompletionFilters and CompletionItems. The automationName parameter should be localized.
-        static ImageElement MetalIcon = new ImageElement(new ImageId(new Guid("ae27a6b0-e345-4288-96df-5eaf394ee369"), 2708), "Metal");
-        static ImageElement NonMetalIcon = new ImageElement(new ImageId(new Guid("ae27a6b0-e345-4288-96df-5eaf394ee369"), 2709), "Non metal");
-        static ImageElement MetalloidIcon = new ImageElement(new ImageId(new Guid("ae27a6b0-e345-4288-96df-5eaf394ee369"), 2716), "Metalloid");
-        static ImageElement UnknownIcon = new ImageElement(new ImageId(new Guid("ae27a6b0-e345-4288-96df-5eaf394ee369"), 3533), "Unknown");
+        static ImageElement TableIcon = new ImageElement(KnownMonikers.BalanceBrace.ToImageId(), "Table");
+        static ImageElement MethodIcon = new ImageElement(KnownMonikers.Method.ToImageId(), "Method");
+        static ImageElement GlobalVariableIcon = new ImageElement(KnownMonikers.GlobalVariable.ToImageId(), "GlobalVariable");
+        static ImageElement UnknownIcon = new ImageElement(KnownMonikers.GlobalVariable.ToImageId(), "Unknown");
 
         // CompletionFilters are rendered in the UI as buttons
         // The displayText should be localized. Alt + Access Key toggles the filter button.
-        static CompletionFilter MetalFilter = new CompletionFilter("Metal", "M", MetalIcon);
-        static CompletionFilter NonMetalFilter = new CompletionFilter("Non metal", "N", NonMetalIcon);
+        static CompletionFilter TableFilter = new CompletionFilter("Table", "T", TableIcon);
+        static CompletionFilter MethodFilter = new CompletionFilter("Method", "M", MethodIcon);
         static CompletionFilter UnknownFilter = new CompletionFilter("Unknown", "U", UnknownIcon);
 
         // CompletionItem takes array of CompletionFilters.
-        // In this example, items assigned "MetalloidFilters" are visible in the list if user selects either MetalFilter or NonMetalFilter.
-        static ImmutableArray<CompletionFilter> MetalFilters = ImmutableArray.Create(MetalFilter);
-        static ImmutableArray<CompletionFilter> NonMetalFilters = ImmutableArray.Create(NonMetalFilter);
-        static ImmutableArray<CompletionFilter> MetalloidFilters = ImmutableArray.Create(MetalFilter, NonMetalFilter);
+        // In this example, items assigned "GlobalVariableFilters" are visible in the list if user selects either TableFilter or MethodFilter.
+        static ImmutableArray<CompletionFilter> TableFilters = ImmutableArray.Create(TableFilter);
+        static ImmutableArray<CompletionFilter> MethodFilters = ImmutableArray.Create(MethodFilter);
+        static ImmutableArray<CompletionFilter> GlobalVariableFilters = ImmutableArray.Create(TableFilter, MethodFilter);
         static ImmutableArray<CompletionFilter> UnknownFilters = ImmutableArray.Create(UnknownFilter);
 
         public NPLCompletionSource(NPLDocs docs_, ITextStructureNavigatorSelectorService structureNavigatorSelector)
@@ -49,7 +50,6 @@ namespace NPLForVisualStudio
         {
             // We don't trigger completion when user typed
             if (char.IsNumber(trigger.Character)         // a number
-                || char.IsPunctuation(trigger.Character) // punctuation
                 || trigger.Character == '\n'             // new line
                 || trigger.Character == '\t'             // tab 
                 || trigger.Reason == CompletionTriggerReason.Backspace
@@ -92,7 +92,7 @@ namespace NPLForVisualStudio
 
             var snapshot = triggerLocation.Snapshot;
             var tokenText = tokenSpan.GetText(snapshot);
-            if (string.IsNullOrWhiteSpace(tokenText))
+            if (string.IsNullOrWhiteSpace(tokenText) || tokenText == "." || tokenText == ":")
             {
                 // The token at this location is empty. Return an empty span, which will grow as user types.
                 return new SnapshotSpan(triggerLocation, 0);
@@ -131,14 +131,15 @@ namespace NPLForVisualStudio
             var spanBeforeCaret = new SnapshotSpan(lineStart, triggerLocation);
             var textBeforeCaret = triggerLocation.Snapshot.GetText(spanBeforeCaret);
             var colonIndex = textBeforeCaret.IndexOf(':');
-            var colonExistsBeforeCaret = colonIndex != -1;
+            var commaIndex = textBeforeCaret.IndexOf('.');
+            var colonExistsBeforeCaret = colonIndex != -1 || commaIndex!= -1;
 
             // User is likely in the key portion of the pair
             if (!colonExistsBeforeCaret)
                 return GetContextForKey();
 
             // User is likely in the value portion of the pair. Try to provide extra items based on the key.
-            var KeyExtractingRegex = new Regex(@"\W*(\w+)\W*:");
+            var KeyExtractingRegex = new Regex(@"([\w_]+)[:\.]");
             var key = KeyExtractingRegex.Match(textBeforeCaret);
             var candidateName = key.Success ? key.Groups.Count > 0 && key.Groups[1].Success ? key.Groups[1].Value : string.Empty : string.Empty;
             return GetContextForValue(candidateName);
@@ -153,55 +154,43 @@ namespace NPLForVisualStudio
             ImmutableArray<CompletionItem> itemsBasedOnKey = ImmutableArray<CompletionItem>.Empty;
             if (!string.IsNullOrEmpty(key))
             {
-                var matchingElement = docs.Elements.FirstOrDefault(n => n.Name == key);
-                if (matchingElement != null)
-                {
-                    var itemsBuilder = ImmutableArray.CreateBuilder<CompletionItem>();
-                    itemsBuilder.Add(new CompletionItem(matchingElement.Name, this));
-                    itemsBuilder.Add(new CompletionItem(matchingElement.Symbol, this));
-                    itemsBuilder.Add(new CompletionItem(matchingElement.AtomicNumber.ToString(), this));
-                    itemsBuilder.Add(new CompletionItem(matchingElement.AtomicWeight.ToString(), this));
-                    itemsBasedOnKey = itemsBuilder.ToImmutable();
-                }
+                itemsBasedOnKey = docs.xmlDeclarationProvider.GetMemberSelectDeclarations(key).Select(n => MakeItemFromElement(n)).ToImmutableArray();
             }
-            // We would like to allow user to type anything, so we create SuggestionItemOptions
-            var suggestionOptions = new SuggestionItemOptions("Value of your choice", $"Please enter value for key {key}");
-
-            return new CompletionContext(itemsBasedOnKey, suggestionOptions);
+            return new CompletionContext(itemsBasedOnKey);
         }
 
         /// <summary>
-        /// Returns completion items applicable to the key portion of the key-value pair
+        /// Returns completion items applicable to the key portion of the key:value pair
         /// </summary>
         private CompletionContext GetContextForKey()
         {
-            var context = new CompletionContext(docs.Elements.Select(n => MakeItemFromElement(n)).ToImmutableArray());
+            var context = new CompletionContext(docs.xmlDeclarationProvider.GetCompleteWordDeclarations().Select(n => MakeItemFromElement(n)).ToImmutableArray());
             return context;
         }
 
         /// <summary>
-        /// Builds a <see cref="CompletionItem"/> based on <see cref="NPLDocs.Element"/>
+        /// Builds a <see cref="CompletionItem"/> based on <see cref="Declaration"/>
         /// </summary>
-        private CompletionItem MakeItemFromElement(NPLDocs.Element element)
+        private CompletionItem MakeItemFromElement(Declaration element)
         {
             ImageElement icon = null;
             ImmutableArray<CompletionFilter> filters;
 
-            switch (element.Category)
+            switch (element.DeclarationType)
             {
-                case NPLDocs.Element.Categories.Metal:
-                    icon = MetalIcon;
-                    filters = MetalFilters;
+                case DeclarationType.Table:
+                    icon = TableIcon;
+                    filters = TableFilters;
                     break;
-                case NPLDocs.Element.Categories.Metalloid:
-                    icon = MetalloidIcon;
-                    filters = MetalloidFilters;
+                case DeclarationType.Variable:
+                    icon = GlobalVariableIcon;
+                    filters = GlobalVariableFilters;
                     break;
-                case NPLDocs.Element.Categories.NonMetal:
-                    icon = NonMetalIcon;
-                    filters = NonMetalFilters;
+                case DeclarationType.Function:
+                    icon = MethodIcon;
+                    filters = MethodFilters;
                     break;
-                case NPLDocs.Element.Categories.Uncategorized:
+                default:
                     icon = UnknownIcon;
                     filters = UnknownFilters;
                     break;
@@ -211,15 +200,15 @@ namespace NPLForVisualStudio
                 source: this,
                 icon: icon,
                 filters: filters,
-                suffix: element.Symbol,
-                insertText: element.Name,
-                sortText: $"Element {element.AtomicNumber,3}",
-                filterText: $"{element.Name} {element.Symbol}",
+                suffix: string.Empty,
+                insertText: element.GetInsertText(),
+                sortText: element.Name,
+                filterText: element.Name,
                 attributeIcons: ImmutableArray<ImageElement>.Empty);
 
             // Each completion item we build has a reference to the element in the property bag.
             // We use this information when we construct the tooltip.
-            item.Properties.AddProperty(nameof(NPLDocs.Element), element);
+            item.Properties.AddProperty(nameof(NPLDocs), element);
 
             return item;
         }
@@ -229,22 +218,23 @@ namespace NPLForVisualStudio
         /// </summary>
         public async Task<object> GetDescriptionAsync(IAsyncCompletionSession session, CompletionItem item, CancellationToken token)
         {
-            if (item.Properties.TryGetProperty<NPLDocs.Element>(nameof(NPLDocs.Element), out var matchingElement))
+            if (item.Properties.TryGetProperty<Declaration>(nameof(NPLDocs), out var matchingElement))
             {
-                return $"{matchingElement.Name} [{matchingElement.AtomicNumber}, {matchingElement.Symbol}] is {GetCategoryName(matchingElement.Category)} with atomic weight {matchingElement.AtomicWeight}";
+                if(matchingElement.DeclarationType == DeclarationType.Function)
+                {
+                    string sText = $"{matchingElement.GetInsertText()}";
+                    if(!String.IsNullOrEmpty(matchingElement.Description))
+                    {
+                        sText += $"\n{matchingElement.Description}";
+                    }
+                    return sText;
+                }
+                else
+                {
+                    return $"{matchingElement.Name} [{matchingElement.DeclarationType.ToString()}]";
+                }
             }
             return null;
-        }
-
-        private string GetCategoryName(NPLDocs.Element.Categories category)
-        {
-            switch(category)
-            {
-                case NPLDocs.Element.Categories.Metal: return "a metal";
-                case NPLDocs.Element.Categories.Metalloid: return "a metalloid";
-                case NPLDocs.Element.Categories.NonMetal: return "a non metal";
-                default:  return "an uncategorized element";
-            }
         }
     }
 }

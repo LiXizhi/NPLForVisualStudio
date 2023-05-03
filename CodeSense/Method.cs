@@ -52,5 +52,10 @@ namespace NPLForVisualStudio
             output.Append(")");
             return output.ToString();
         }
+
+        public override string GetInsertText()
+        {
+            return GetMethodDeclarationString();
+        }
     }
 }
