@@ -50,8 +50,8 @@
     <Compile Include="CodeSense\DeclarationType.cs" />
     <Compile Include="CodeSense\Method.cs" />
     <Compile Include="CodeSense\Parameter.cs" />
-    <Compile Include="Documentation\CommandDoc.cs" />
-    <Compile Include="Documentation\DeclarationAuthoringScope.cs" />
+    <Compile Include="CodeSense\CommandDoc.cs" />
+    <Compile Include="CodeSense\DeclarationAuthoringScope.cs" />
     <Compile Include="NPLAsyncQuickInfoProvider.cs" />
     <Compile Include="NPLAsyncQuickInfoSource.cs" />
     <Compile Include="NPLCommandGotoDefinition.cs" />

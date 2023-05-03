@@ -89,6 +89,7 @@ namespace NPLForVisualStudio
         /// <param name="e">Event args.</param>
         private void Execute(object sender, EventArgs e)
         {
+            // ThreadHelper.ThrowIfNotOnUIThread();
             try
             {
                 EnvDTE.DTE dte = NPLDocs.Instance.Dte;

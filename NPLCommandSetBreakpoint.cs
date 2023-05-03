@@ -111,7 +111,7 @@ namespace NPLForVisualStudio
                             new KeyValuePair<string, string>("filename", sFileName),
                             new KeyValuePair<string, string>("line", lineNumber.ToString()),
                         });
-                    var result = client.PostAsync("/ajax/debugger", content).Result;
+                    var result = await client.PostAsync("/ajax/debugger", content);
                     string sResult = await result.Content.ReadAsStringAsync();
                     // completed successfully
                     string url = "http://127.0.0.1:8099/debugger";

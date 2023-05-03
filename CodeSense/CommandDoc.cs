@@ -7,7 +7,7 @@ using System.Text.RegularExpressions;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ParaEngine.NPLLanguageService
+namespace NPLForVisualStudio.Doc
 {
     static class CommandDoc
     {
