@@ -225,7 +225,7 @@ namespace NPLForVisualStudio
         /// </summary>
         /// <param name="filename"></param>
         /// <returns></returns>
-        private string GetAbsolutionFilePath(string filename)
+        public string GetAbsolutionFilePath(string filename)
         {
             if (!File.Exists(filename) && !filename.Contains(":"))
             {
@@ -261,6 +261,8 @@ namespace NPLForVisualStudio
                     if (func.FilenameDefinedIn != null)
                     {
                         authoringScope.m_goto_filename = GetAbsolutionFilePath(func.FilenameDefinedIn);
+                        authoringScope.m_goto_textspan.iStartLine = Int32.Parse(func.LineDefined);
+                        authoringScope.m_goto_textspan.iEndLine = authoringScope.m_goto_textspan.iStartLine;
                         return true;
                     }
                 }
@@ -303,6 +305,8 @@ namespace NPLForVisualStudio
                         if (sFilename != null)
                         {
                             authoringScope.m_goto_filename = sFilename;
+                            authoringScope.m_goto_textspan.iStartLine = 0;
+                            authoringScope.m_goto_textspan.iEndLine = 0;
                             return true;
                         }
                     }

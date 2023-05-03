@@ -87,7 +87,7 @@ namespace NPLForVisualStudio
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event args.</param>
-        private async void Execute(object sender, EventArgs e)
+        private void Execute(object sender, EventArgs e)
         {
             try
             {
@@ -104,11 +104,19 @@ namespace NPLForVisualStudio
                 if(!String.IsNullOrEmpty(sLine) && NPLDocs.Instance.FindGotoDefinition(sLine, nLineCharOffset))
                 {
                     var authoringScope = NPLDocs.Instance.authoringScope;
-                    dte.Documents.Open(authoringScope.m_goto_filename);
+                    dte.ItemOperations.OpenFile(authoringScope.m_goto_filename);
+                    ts = dte.ActiveWindow.Selection as EnvDTE.TextSelection;
+                    if (ts == null)
+                        return;
+                    if(authoringScope.m_goto_textspan.iStartLine > 0)
+                    {
+                        ts.GotoLine(authoringScope.m_goto_textspan.iStartLine, false);
+                    }
                 }
             }
-            catch (Exception)
+            catch (Exception err)
             {
+                Console.WriteLine(err.ToString());
             }
         }
     }

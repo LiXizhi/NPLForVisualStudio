@@ -33,6 +33,8 @@ namespace NPLForVisualStudio
     [PackageRegistration(UseManagedResourcesOnly = true, AllowsBackgroundLoading = true)]
     [Guid(NPLForVisualStudioPackage.PackageGuidString)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.NoSolution_string, PackageAutoLoadFlags.BackgroundLoad)]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExists_string, PackageAutoLoadFlags.BackgroundLoad)]
     public sealed class NPLForVisualStudioPackage : AsyncPackage
     {
         /// <summary>
@@ -62,6 +64,11 @@ namespace NPLForVisualStudio
             var events = NPLDocs.Instance.Dte.Events;
             var solutionEvents = events.SolutionEvents;
             solutionEvents.Opened += HandleOpenSolution;
+
+            if(NPLDocs.Instance.Dte.Solution.IsOpen)
+            {
+                HandleOpenSolution();
+            }
         }
 
         #endregion

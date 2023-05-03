@@ -41,6 +41,12 @@ namespace NPLForVisualStudio
                     List<ContainerElement> childElements = new List<ContainerElement>();
                     foreach (var method in listMethods)
                     {
+                        childElements.Add(new ContainerElement(
+                            ContainerElementStyle.Wrapped,
+                            new ImageElement(_icon),
+                            new ClassifiedTextElement(
+                                new ClassifiedTextRun(PredefinedClassificationTypeNames.Identifier, method.GetMethodDeclarationString())
+                        )));
                         if (!string.IsNullOrEmpty(method.Description))
                         {
                             childElements.Add(new ContainerElement(
@@ -49,12 +55,14 @@ namespace NPLForVisualStudio
                                     new ClassifiedTextRun(PredefinedClassificationTypeNames.Comment, method.Description)
                                 )));
                         }
-                        childElements.Add(new ContainerElement(
-                            ContainerElementStyle.Wrapped,
-                            new ImageElement(_icon),
-                            new ClassifiedTextElement(
-                                new ClassifiedTextRun(PredefinedClassificationTypeNames.Identifier, method.GetMethodDeclarationString())
-                        )));
+                        if (!string.IsNullOrEmpty(method.FilenameDefinedIn))
+                        {
+                            childElements.Add(new ContainerElement(
+                                ContainerElementStyle.Wrapped,
+                                new ClassifiedTextElement(
+                                    new ClassifiedTextRun(PredefinedClassificationTypeNames.Keyword, $"in {method.FilenameDefinedIn}:{method.LineDefined}")
+                                ))); ;
+                        }
                     }
 
                     var parentElm = new ContainerElement(ContainerElementStyle.Stacked, childElements);
