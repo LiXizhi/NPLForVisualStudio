@@ -92,40 +92,46 @@ namespace NPLForVisualStudio
         /// </summary>
         /// <param name="sender">Event sender.</param>
         /// <param name="e">Event args.</param>
-        private async void Execute(object sender, EventArgs e)
+        private void Execute(object sender, EventArgs e)
         {
+            // await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+            ThreadHelper.ThrowIfNotOnUIThread();
             EnvDTE.DTE dte = NPLDocs.Instance.Dte;
             EnvDTE.TextSelection ts = dte.ActiveWindow.Selection as EnvDTE.TextSelection;
             if (ts == null)
                 return;
-            try
+
+            string sFileName = dte.ActiveWindow.Document.FullName;
+            int lineNumber = ts.CurrentLine;
+
+            Task.Run(async () =>
             {
-                string sFileName = dte.ActiveWindow.Document.FullName;
-                int lineNumber = ts.CurrentLine;
-                // System.Windows.MessageBox.Show("Set breakpoint here..." + sFileName + lineNumber.ToString());
-                using (var client = new HttpClient())
+                try
                 {
-                    client.BaseAddress = new Uri("http://127.0.0.1:8099/");
-                    var content = new FormUrlEncodedContent(new[]{
-                            new KeyValuePair<string, string>("action", "addbreakpoint"),
-                            new KeyValuePair<string, string>("filename", sFileName),
-                            new KeyValuePair<string, string>("line", lineNumber.ToString()),
-                        });
-                    var result = await client.PostAsync("/ajax/debugger", content);
-                    string sResult = await result.Content.ReadAsStringAsync();
-                    // completed successfully
-                    string url = "http://127.0.0.1:8099/debugger";
-                    // url += string.Format("?filename={0}&line={1}", sFileName, lineNumber);
-                    System.Diagnostics.Process.Start(url);
+                    using (var client = new HttpClient())
+                    {
+                        client.BaseAddress = new Uri("http://127.0.0.1:8099/");
+                        var content = new FormUrlEncodedContent(new[]{
+                                new KeyValuePair<string, string>("action", "addbreakpoint"),
+                                new KeyValuePair<string, string>("filename", sFileName),
+                                new KeyValuePair<string, string>("line", lineNumber.ToString()),
+                            });
+                        var result = await client.PostAsync("/ajax/debugger", content);
+                        string sResult = await result.Content.ReadAsStringAsync();
+                        // completed successfully
+                        string url = "http://127.0.0.1:8099/debugger";
+                        // url += string.Format("?filename={0}&line={1}", sFileName, lineNumber);
+                        System.Diagnostics.Process.Start(url);
+                    }
                 }
-            }
-            catch (Exception)
-            {
-                if (System.Windows.MessageBox.Show("Please start your NPL process first \nand start NPL Code Wiki at: \n http://127.0.0.1:8099/ \nDo you want to see help page?", "NPL HTTP Debugger", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes)
+                catch (Exception)
                 {
-                    System.Diagnostics.Process.Start("https://github.com/LiXizhi/NPLRuntime/wiki/NPLCodeWiki");
+                    if (System.Windows.MessageBox.Show("Please start your NPL process first \nand start NPL Code Wiki at: \n http://127.0.0.1:8099/ \nDo you want to see help page?", "NPL HTTP Debugger", System.Windows.MessageBoxButton.YesNo, System.Windows.MessageBoxImage.Warning) == System.Windows.MessageBoxResult.Yes)
+                    {
+                        System.Diagnostics.Process.Start("https://github.com/LiXizhi/NPLRuntime/wiki/NPLCodeWiki");
+                    }
                 }
-            }
+            });
         }
     }
 }
