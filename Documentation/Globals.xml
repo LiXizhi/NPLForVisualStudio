@@ -71,6 +71,45 @@
         The contents of the argument as separate values.
       </returns>
     </function>
+    <keyword name="if">
+      <summary>
+        if () then
+      </summary>
+    </keyword>
+    <keyword name="then">
+    </keyword>
+    <keyword name="else">
+    </keyword>
+    <keyword name="elseif">
+      <summary>
+        elseif () then
+      </summary>
+    </keyword>
+    <keyword name="end">
+    </keyword>
+    <keyword name="function">
+      function () end
+    </keyword>
+    <keyword name="for">
+      <summary>
+        for i = from, to do
+      </summary>
+    </keyword>
+    <keyword name="while">
+      <summary>
+        while () do
+      </summary>
+    </keyword>
+    <snippet name="ipairs">
+      <summary>
+        for index, value in ipairs() do
+      </summary>
+    </snippet>
+    <snippet name="pairs">
+      <summary>
+        for key, value in pairs() do
+      </summary>
+    </snippet>
   </globals>
 </doc>
 

@@ -109,6 +109,10 @@ namespace NPLForVisualStudio
 
         public virtual string GetInsertText()
         {
+            if(DeclarationType == DeclarationType.Snippet || DeclarationType == DeclarationType.Keyword)
+            {
+                return String.IsNullOrEmpty(Description) ? Name : Description;
+            }
             return Name;
         }
     }
