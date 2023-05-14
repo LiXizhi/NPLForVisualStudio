@@ -15,7 +15,6 @@ namespace NPLForVisualStudio
         [BaseDefinition("text")]
         internal static ContentTypeDefinition NPLContentTypeDefinition;
 
-
         [Export]
         [FileExtension(".npl")]
         [ContentType("npl")]

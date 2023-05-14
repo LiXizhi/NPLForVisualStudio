@@ -1,6 +1,7 @@
 ﻿using EnvDTE;
 using EnvDTE80;
 using Microsoft.VisualStudio.Package;
+using Microsoft.VisualStudio.Shell;
 using Microsoft.VisualStudio.TextManager.Interop;
 using System;
 using System.Collections.Generic;
@@ -59,6 +60,7 @@ namespace NPLForVisualStudio
 
         public void LoadDocumentationInSolution()
         {
+            ThreadHelper.ThrowIfNotOnUIThread();
             try
             {
                 string solutionDir = System.IO.Path.GetDirectoryName(Dte.Solution.FullName);
