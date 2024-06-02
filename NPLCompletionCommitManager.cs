@@ -29,7 +29,8 @@ namespace NPLForVisualStudio
         {
         }
 
-        ImmutableArray<char> commitChars = new char[] { ' ', '\'', '"', ',', '.', ';', ':' }.ToImmutableArray();
+        // fixed: space key is not a commit character
+        ImmutableArray<char> commitChars = new char[] { '\'', '"', ',', '.', ';', ':' }.ToImmutableArray();
 
         public IEnumerable<char> PotentialCommitCharacters => commitChars;
 
